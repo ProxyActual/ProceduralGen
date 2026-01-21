@@ -4,9 +4,9 @@ class WorldDisplay
 {
     private int width;
     private int height;
-    private NoiseGen LargeHeight = new NoiseGen(scale: 10.0f);
-    private NoiseGen MidHeight = new NoiseGen(scale: 5.0f);
-    private NoiseGen SmallHeight = new NoiseGen(scale: 1.0f);
+    private NoiseGen LargeHeight = new NoiseGen(scale: 100.0f);
+    private NoiseGen MidHeight = new NoiseGen(scale: 50.0f);
+    private NoiseGen SmallHeight = new NoiseGen(scale: 10.0f);
     public WorldDisplay(int width, int height)
     {
         this.width = width;
@@ -24,23 +24,33 @@ class WorldDisplay
                     MidHeight.perlinNoise(x + xOffset, y + yOffset, 0.0f + zOffset) * 0.2f +
                     SmallHeight.perlinNoise(x + xOffset, y + yOffset, 0.0f + zOffset) * 0.1f;
 
-                char[] shades = { ' ', ' ', ':', '-', '=', '+', '*', '#', '%', '@' };
-                int shadeIndex = (int)((noiseValue + 1) / 2 * (shades.Length - 1));
-                
-                // Set color based on height
-                if (shadeIndex < 3)
-                    Console.ForegroundColor = ConsoleColor.Blue; // Water
-                else if (shadeIndex < 5)
-                    Console.ForegroundColor = ConsoleColor.Green; // Low land
-                else if (shadeIndex < 7)
-                    Console.ForegroundColor = ConsoleColor.Yellow; // Hills
-                else
-                    Console.ForegroundColor = ConsoleColor.White; // Mountains
-                
-                Console.Write(shades[shadeIndex]);
-                Console.ResetColor();
+                printPosition(noiseValue);
             }
             Console.WriteLine();
         }
+    }
+
+    private void printPosition(float heightValue)
+    {
+        float heightScale = (heightValue + 1) / 2.0f;
+        ConsoleColor [] colors = {
+            ConsoleColor.DarkBlue,
+            ConsoleColor.Blue,
+            ConsoleColor.Yellow,
+            ConsoleColor.Green,
+            ConsoleColor.DarkGreen,
+            ConsoleColor.DarkGray,
+            ConsoleColor.Gray,
+            ConsoleColor.White
+        };
+        char[] shades = {' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'};
+        int colorIndex = (int)(heightScale * (colors.Length - 1));
+        int nextColorIndex = Math.Min(colorIndex + 1, colors.Length - 1);
+        float colorBlend = (heightScale * (colors.Length - 1)) - colorIndex;
+        Console.ForegroundColor = colors[colorIndex];
+        Console.BackgroundColor = colors[nextColorIndex];
+        int shadeIndex = (int)((1.0f - colorBlend) * (shades.Length));
+        Console.Write(shades[shadeIndex]);
+        Console.ResetColor();
     }
 }
